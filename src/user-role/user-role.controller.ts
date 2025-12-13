@@ -10,5 +10,5 @@ export class UserRoleController {
     @Roles(Role.Admin)
     getAdminData(){
         return { message: "Oly admin can access"}
-    }
+    };
 }
