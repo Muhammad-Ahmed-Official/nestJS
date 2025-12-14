@@ -18,13 +18,19 @@ import { StudentModule } from './student/student.module';
 import { UserSqlService } from './user-sql/user-sql.service';
 import { UserSqlController } from './user-sql/user-sql.controller';
 import { UserSqlModule } from './user-sql/user-sql.module';
+import { AuthModule } from './auth/auth.module';
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  imports: [EmployeeModule, CustomerModule, ConfigModule.forRoot({ isGlobal: true }), 
-    MongooseModule.forRoot(process.env.DATABASE_URL as string), StudentModule, UserSqlModule
+  imports: [
+    EmployeeModule, CustomerModule, ConfigModule.forRoot({ isGlobal: true }), 
+    MongooseModule.forRoot(process.env.DATABASE_URL as string), StudentModule, UserSqlModule, AuthModule,
+    ThrottlerModule.forRoot({ throttlers: [ { name: 'default', ttl: seconds(60), limit: 3} ], errorMessage: 'Too many request! Please wait a minute and try again!' })
   ],
   controllers: [AppController, UserController, ProductController, UserRoleController, ExceptionController, DatabaseEventController, ExampleController, UserSqlController],
-  providers: [AppService, ProductService, DatabaseEventService, UserSqlService],
+  providers: [ AppService, ProductService, DatabaseEventService, UserSqlService, { provide: APP_GUARD, useClass: ThrottlerGuard } ],
+  // useClass: ThrottlerGuard it use to stop to go to controller if we hit the limit 
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
