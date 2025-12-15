@@ -21,15 +21,23 @@ import { UserSqlModule } from './user-sql/user-sql.module';
 import { AuthModule } from './auth/auth.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { BookModule } from './book/book.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     EmployeeModule, CustomerModule, ConfigModule.forRoot({ isGlobal: true }), 
-    MongooseModule.forRoot(process.env.DATABASE_URL as string), StudentModule, UserSqlModule, AuthModule,
-    ThrottlerModule.forRoot({ throttlers: [ { name: 'default', ttl: seconds(60), limit: 3} ], errorMessage: 'Too many request! Please wait a minute and try again!' })
+    MongooseModule.forRoot(process.env.DATABASE_URL as string), StudentModule,  AuthModule,
+    // ThrottlerModule.forRoot({ throttlers: [ { name: 'default', ttl: seconds(60), limit: 3} ], errorMessage: 'Too many request! Please wait a minute and try again!' }),
+    BookModule, GraphQLModule.forRoot<ApolloDriverConfig>({ driver: ApolloDriver, autoSchemaFile: join(process.cwd(), 'src/schema.gql'), sortSchema: true, playground: true  }), PrismaModule
+    // playground provide playground on web browser to run and test query
   ],
-  controllers: [AppController, UserController, ProductController, UserRoleController, ExceptionController, DatabaseEventController, ExampleController, UserSqlController],
-  providers: [ AppService, ProductService, DatabaseEventService, UserSqlService, { provide: APP_GUARD, useClass: ThrottlerGuard } ],
+  controllers: [AppController, UserController, ProductController, UserRoleController, ExceptionController, DatabaseEventController, ExampleController, ],
+  providers: [ AppService, ProductService, DatabaseEventService,],
+  //  { provide: APP_GUARD, useClass: ThrottlerGuard } 
   // useClass: ThrottlerGuard it use to stop to go to controller if we hit the limit 
 })
 export class AppModule implements NestModule {

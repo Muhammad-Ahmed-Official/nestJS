@@ -11,9 +11,9 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get()
-  @Throttle({ default: { limit: 3, ttl: 60000 }})
-  getHi(): string {
-    return "Hi limitnig!";
-  }
+  // @Get()
+  // @Throttle({ default: { limit: 3, ttl: 60000 }})
+  // getHi(): string {
+  //   return "Hi limitnig!";
+  // }
 }
